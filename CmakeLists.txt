@@ -5,7 +5,7 @@ if (DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE ${VCPKG_PATH} CACHE STRING "")
 endif()
 
-project(SdlWithCMake VERSION 1.0)
+project(MyVulkanProject VERSION 1.0)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -21,18 +21,18 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:__cplusplus>")
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(
-    SdlWithCMake
+    MyVulkanProject
     ${SOURCES}
 )
 
 target_link_libraries(
-    SdlWithCMake PRIVATE
+    MyVulkanProject PRIVATE
     glfw
     glm::glm
     Vulkan::Vulkan
 )
 
 add_custom_command(
-    TARGET SdlWithCMake POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:SdlWithCMake>/resources
+    TARGET MyVulkanProject POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:MyVulkanProject>/resources
 )
