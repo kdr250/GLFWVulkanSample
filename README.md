@@ -1,5 +1,5 @@
 # GLFWVulkanSample
-GLFW + Vulkan のチュートリアルを試す用レポジトリ
+Vulkan + GLFW のチュートリアルを試す用レポジトリ
 
 ## 参考URL
 - [Vulkan Tutorial](https://vulkan-tutorial.com/Introduction)
