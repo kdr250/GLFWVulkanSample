@@ -164,6 +164,8 @@ private:
 
         float queuePriority              = 1.0f;
         queueCreateInfo.pQueuePriorities = &queuePriority;
+
+        VkPhysicalDeviceFeatures deviceFeatures {};
     }
 
     void createInstance()
