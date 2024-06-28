@@ -85,6 +85,20 @@ private:
             createInfo.enabledLayerCount = 0;
         }
 
+#ifdef __APPLE__
+        std::vector<const char*> requiredExtensions;
+
+        for (uint32_t i = 0; i < glfwExtensionCount; ++i)
+        {
+            requiredExtensions.emplace_back(glfwExtensions[i]);
+        }
+        requiredExtensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+
+        createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        createInfo.enabledExtensionCount   = (uint32_t)requiredExtensions.size();
+        createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+#endif
+
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create instance!");
