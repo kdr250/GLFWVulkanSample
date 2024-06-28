@@ -76,6 +76,8 @@ private:
 
     VkDevice device;
 
+    VkQueue graphicsQueue;
+
     void initWindow()
     {
         glfwInit();
@@ -188,6 +190,8 @@ private:
         {
             throw std::runtime_error("failed to create logical device!");
         }
+
+        vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
     }
 
     void createInstance()
