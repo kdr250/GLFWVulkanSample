@@ -74,6 +74,8 @@ private:
 
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
+    VkDevice device;
+
     void initWindow()
     {
         glfwInit();
@@ -89,6 +91,7 @@ private:
         createInstance();
         setupDebugMessenger();
         pickPhysicalDevice();
+        createLogicalDevice();
     }
 
     void pickPhysicalDevice()
@@ -149,6 +152,8 @@ private:
 
         return indices;
     }
+
+    void createLogicalDevice() {}
 
     void createInstance()
     {
