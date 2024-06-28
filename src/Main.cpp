@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 #include <cstdlib>
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <vector>
 
@@ -109,7 +110,12 @@ private:
 
     bool isDeviceSuitable(VkPhysicalDevice device)
     {
-        return true;
+        VkPhysicalDeviceProperties deviceProperties;
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
     }
 
     void createInstance()
