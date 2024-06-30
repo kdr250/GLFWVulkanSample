@@ -222,11 +222,12 @@ private:
         VkPhysicalDeviceFeatures deviceFeatures {};
 
         VkDeviceCreateInfo createInfo {};
-        createInfo.sType                 = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        createInfo.pQueueCreateInfos     = queueCreateInfos.data();
-        createInfo.queueCreateInfoCount  = static_cast<uint32_t>(queueCreateInfos.size());
-        createInfo.pEnabledFeatures      = &deviceFeatures;
-        createInfo.enabledExtensionCount = 0;
+        createInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.pQueueCreateInfos       = queueCreateInfos.data();
+        createInfo.queueCreateInfoCount    = static_cast<uint32_t>(queueCreateInfos.size());
+        createInfo.pEnabledFeatures        = &deviceFeatures;
+        createInfo.enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size());
+        createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
         if (enableValidationLayers)
         {
