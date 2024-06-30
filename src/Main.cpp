@@ -5,6 +5,7 @@
 #include <GLFW/glfw3native.h>
 
 #include <vulkan/vulkan.h>
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -17,6 +18,8 @@ const uint32_t WIDTH  = 800;
 const uint32_t HEIGHT = 600;
 
 const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+
+const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -138,7 +141,28 @@ private:
     {
         QueueFamilyIndices indices = findQueueFamilies(device);
 
+        bool extensionsSupported = checkDeviceExtensionSupport(device);
+
         return indices.isComplete();
+    }
+
+    bool checkDeviceExtensionSupport(VkPhysicalDevice device)
+    {
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+        std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+        std::vector<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+        for (const auto& extension : availableExtensions)
+        {
+            auto iter = std::remove(requiredExtensions.begin(), requiredExtensions.end(), extension.extensionName);
+            requiredExtensions.erase(iter, requiredExtensions.end());
+        }
+
+        return requiredExtensions.empty();
     }
 
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
