@@ -132,6 +132,7 @@ private:
         createLogicalDevice();
         createSwapChain();
         createImageViews();
+        createRenderPass();
         createGraphicsPipeline();
     }
 
@@ -438,6 +439,11 @@ private:
                 throw std::runtime_error("failed to create image views!");
             }
         }
+    }
+
+    void createRenderPass()
+    {
+        // TODO
     }
 
     void createGraphicsPipeline()
