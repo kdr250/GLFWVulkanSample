@@ -490,6 +490,15 @@ private:
         rasterizer.depthBiasClamp          = 0.0f;  // Optional
         rasterizer.depthBiasSlopeFactor    = 0.0f;  // Optional
 
+        VkPipelineMultisampleStateCreateInfo multisampling {};
+        multisampling.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampling.sampleShadingEnable   = VK_FALSE;
+        multisampling.rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT;
+        multisampling.minSampleShading      = 1.0f;      // Optional
+        multisampling.pSampleMask           = nullptr;   // Optional
+        multisampling.alphaToCoverageEnable = VK_FALSE;  // Optional
+        multisampling.alphaToOneEnable      = VK_FALSE;  // Optional
+
         VkPipelineDynamicStateCreateInfo dynamicState {};
         dynamicState.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
