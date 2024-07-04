@@ -1,8 +1,12 @@
 #define NOMINMAX
-#define VK_USE_PLATFORM_WIN32_KHR
+#ifdef WIN32
+    #define VK_USE_PLATFORM_WIN32_KHR
+#endif
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
+#ifdef WIN32
+    #define GLFW_EXPOSE_NATIVE_WIN32
+#endif
 #include <GLFW/glfw3native.h>
 
 #include <vulkan/vulkan.h>
@@ -23,7 +27,11 @@ const uint32_t HEIGHT = 600;
 
 const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
+#ifdef __APPLE__
+const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_KHR_portability_subset"};
+#else
 const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+#endif
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -690,6 +698,7 @@ private:
 
 #ifdef __APPLE__
         extensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        extensions.emplace_back("VK_KHR_get_physical_device_properties2");
         createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
 
