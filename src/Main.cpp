@@ -807,7 +807,13 @@ private:
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
+            drawFrame();
         }
+    }
+
+    void drawFrame()
+    {
+        // TODO
     }
 
     void cleanup()
