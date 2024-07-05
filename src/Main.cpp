@@ -889,7 +889,6 @@ private:
     void drawFrame()
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-        vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(device,
@@ -908,6 +907,8 @@ private:
         {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
+
+        vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
         recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
