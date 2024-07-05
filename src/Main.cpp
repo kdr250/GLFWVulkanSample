@@ -170,6 +170,8 @@ private:
 
     std::vector<VkCommandBuffer> commandBuffers;
 
+    VkBuffer vertexBuffer;
+
     std::vector<VkSemaphore> imageAvailableSemaphores;
 
     std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -211,6 +213,7 @@ private:
         createGraphicsPipeline();
         createFramebuffers();
         createCommandPool();
+        createVertexBuffer();
         createCommandBuffers();
         createSyncObjects();
     }
@@ -773,6 +776,20 @@ private:
         }
     }
 
+    void createVertexBuffer()
+    {
+        VkBufferCreateInfo bufferInfo {};
+        bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size        = sizeof(vertices[0]) * vertices.size();
+        bufferInfo.usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create vertex buffer!");
+        }
+    }
+
     void createCommandBuffers()
     {
         commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1026,6 +1043,8 @@ private:
     void cleanup()
     {
         cleanupSwapChain();
+
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
 
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
