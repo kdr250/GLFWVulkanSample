@@ -710,6 +710,8 @@ private:
         rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth               = 1.0f;
         rasterizer.depthBiasEnable         = VK_FALSE;
+        rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
+        rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizer.depthBiasConstantFactor = 0.0f;  // Optional
         rasterizer.depthBiasClamp          = 0.0f;  // Optional
         rasterizer.depthBiasSlopeFactor    = 0.0f;  // Optional
@@ -1107,6 +1109,15 @@ private:
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+        vkCmdBindDescriptorSets(commandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                pipelineLayout,
+                                0,
+                                1,
+                                &descriptorSets[currentFrame],
+                                0,
+                                nullptr);
 
         vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
