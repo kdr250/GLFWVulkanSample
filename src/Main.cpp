@@ -208,6 +208,8 @@ private:
 
     std::vector<VkCommandBuffer> commandBuffers;
 
+    uint32_t mipLevels;
+
     VkImage textureImage;
 
     VkDeviceMemory textureImageMemory;
@@ -627,7 +629,7 @@ private:
         for (size_t i = 0; i < swapChainImages.size(); ++i)
         {
             swapChainImageViews[i] =
-                createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+                createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
         }
     }
 
@@ -916,6 +918,7 @@ private:
 
         createImage(swapChainExtent.width,
                     swapChainExtent.height,
+                    1,
                     depthFormat,
                     VK_IMAGE_TILING_OPTIMAL,
                     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -923,7 +926,7 @@ private:
                     depthImage,
                     depthImageMemory);
 
-        depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+        depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
     }
 
     VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
@@ -987,6 +990,7 @@ private:
 
         createImage(texWidth,
                     texHeight,
+                    mipLevels,
                     VK_FORMAT_R8G8B8A8_SRGB,
                     VK_IMAGE_TILING_OPTIMAL,
                     VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -997,7 +1001,8 @@ private:
         transitionImageLayout(textureImage,
                               VK_FORMAT_R8G8B8A8_SRGB,
                               VK_IMAGE_LAYOUT_UNDEFINED,
-                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              mipLevels);
 
         copyBufferToImage(stagingBuffer,
                           textureImage,
@@ -1007,18 +1012,21 @@ private:
         transitionImageLayout(textureImage,
                               VK_FORMAT_R8G8B8A8_SRGB,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                              mipLevels);
 
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingBufferMemory, nullptr);
+
+        mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
     }
 
     void createTextureImageView()
     {
-        textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+        textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
     }
 
-    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
+    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
     {
         VkImageViewCreateInfo viewInfo {};
         viewInfo.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1027,7 +1035,7 @@ private:
         viewInfo.format                          = format;
         viewInfo.subresourceRange.aspectMask     = aspectFlags;
         viewInfo.subresourceRange.baseMipLevel   = 0;
-        viewInfo.subresourceRange.levelCount     = 1;
+        viewInfo.subresourceRange.levelCount     = mipLevels;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount     = 1;
 
@@ -1071,6 +1079,7 @@ private:
 
     void createImage(uint32_t width,
                      uint32_t height,
+                     uint32_t mipLevels,
                      VkFormat format,
                      VkImageTiling tiling,
                      VkImageUsageFlags usage,
@@ -1084,7 +1093,7 @@ private:
         imageInfo.extent.width  = width;
         imageInfo.extent.height = height;
         imageInfo.extent.depth  = 1;
-        imageInfo.mipLevels     = 1;
+        imageInfo.mipLevels     = mipLevels;
         imageInfo.arrayLayers   = 1;
         imageInfo.format        = format;
         imageInfo.tiling        = tiling;
@@ -1115,7 +1124,11 @@ private:
         vkBindImageMemory(device, image, imageMemory, 0);
     }
 
-    void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+    void transitionImageLayout(VkImage image,
+                               VkFormat format,
+                               VkImageLayout oldLayout,
+                               VkImageLayout newLayout,
+                               uint32_t mipLevels)
     {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -1128,7 +1141,7 @@ private:
         barrier.image                           = image;
         barrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
         barrier.subresourceRange.baseMipLevel   = 0;
-        barrier.subresourceRange.levelCount     = 1;
+        barrier.subresourceRange.levelCount     = mipLevels;
         barrier.subresourceRange.baseArrayLayer = 0;
         barrier.subresourceRange.layerCount     = 1;
 
