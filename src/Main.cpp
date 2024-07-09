@@ -967,6 +967,7 @@ private:
         int texWidth, texHeight, texChannels;
         stbi_uc* pixels        = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4;
+        mipLevels              = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
         if (!pixels)
         {
@@ -1171,9 +1172,10 @@ private:
         samplerInfo.compareEnable           = VK_FALSE;
         samplerInfo.compareOp               = VK_COMPARE_OP_ALWAYS;
         samplerInfo.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        samplerInfo.mipLodBias              = 0.0f;
-        samplerInfo.minLod                  = 0.0f;
-        samplerInfo.maxLod                  = 0.0f;
+        // samplerInfo.minLod                  = 0.0f;  // Optional
+        samplerInfo.minLod     = static_cast<float>(mipLevels / 2);
+        samplerInfo.maxLod     = VK_LOD_CLAMP_NONE;
+        samplerInfo.mipLodBias = 0.0f;  // Optional
 
         if (vkCreateSampler(device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
         {
