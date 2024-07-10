@@ -218,6 +218,12 @@ private:
 
     VkSampler textureSampler;
 
+    VkImage colorImage;
+
+    VkDeviceMemory colorImageMemory;
+
+    VkImageView colorImageView;
+
     VkImage depthImage;
 
     VkDeviceMemory depthImageMemory;
@@ -289,6 +295,7 @@ private:
         createDescriptorSetLayout();
         createGraphicsPipeline();
         createCommandPool();
+        createColorResources();
         createDepthResources();
         createFramebuffers();
         createTextureImage();
@@ -588,6 +595,10 @@ private:
 
     void cleanupSwapChain()
     {
+        vkDestroyImageView(device, colorImageView, nullptr);
+        vkDestroyImage(device, colorImage, nullptr);
+        vkFreeMemory(device, colorImageMemory, nullptr);
+
         vkDestroyImageView(device, depthImageView, nullptr);
         vkDestroyImage(device, depthImage, nullptr);
         vkFreeMemory(device, depthImageMemory, nullptr);
@@ -621,6 +632,7 @@ private:
 
         createSwapChain();
         createImageViews();
+        createColorResources();
         createDepthResources();
         createFramebuffers();
     }
@@ -915,6 +927,24 @@ private:
         }
     }
 
+    void createColorResources()
+    {
+        VkFormat colorFormat = swapChainImageFormat;
+
+        createImage(swapChainExtent.width,
+                    swapChainExtent.height,
+                    1,
+                    msaaSamples,
+                    colorFormat,
+                    VK_IMAGE_TILING_OPTIMAL,
+                    VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                    colorImage,
+                    colorImageMemory);
+
+        colorImageView = createImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+    }
+
     void createDepthResources()
     {
         VkFormat depthFormat = findDepthFormat();
@@ -922,6 +952,7 @@ private:
         createImage(swapChainExtent.width,
                     swapChainExtent.height,
                     1,
+                    msaaSamples,
                     depthFormat,
                     VK_IMAGE_TILING_OPTIMAL,
                     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -995,6 +1026,7 @@ private:
         createImage(texWidth,
                     texHeight,
                     mipLevels,
+                    VK_SAMPLE_COUNT_1_BIT,
                     VK_FORMAT_R8G8B8A8_SRGB,
                     VK_IMAGE_TILING_OPTIMAL,
                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -1224,6 +1256,7 @@ private:
     void createImage(uint32_t width,
                      uint32_t height,
                      uint32_t mipLevels,
+                     VkSampleCountFlagBits numSamples,
                      VkFormat format,
                      VkImageTiling tiling,
                      VkImageUsageFlags usage,
@@ -1244,7 +1277,7 @@ private:
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage         = usage;
         imageInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+        imageInfo.samples       = numSamples;
         imageInfo.flags         = 0;  // Optional
 
         if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS)
